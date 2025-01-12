@@ -113,6 +113,7 @@ async def add_or_update_item(request: Request):
 @app.delete("/delete-stage/{stage_name}/{item_name}")
 async def delete_stage(request: Request, stage_name: str, item_name: str):
     # Find the document where the key 'stage_name' exists and contains 'item_name'
+    stage_name = stage_name.replace("_", " ")
     document = collection.find_one({stage_name: {"$exists": True}})
 
     if document:

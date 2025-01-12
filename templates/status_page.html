@@ -309,6 +309,7 @@
             let pressTimer;
 
             function delItem(stageName) {
+                stageName = stageName.replace(" ","_");
             let userConfirmation = confirm(`Would you like to delete the ${stageName} stage record?`);
             
             if (userConfirmation) {
