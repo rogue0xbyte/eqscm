@@ -308,9 +308,13 @@
         <script>
             let pressTimer;
 
-            function delItem(stageName){
-                let userConfirmation = confirm(`Would you like to delete the ${stageName} stage record?`);
-                if (userConfirmation) {
+            function delItem(stageName) {
+            let userConfirmation = confirm(`Would you like to delete the ${stageName} stage record?`);
+            
+            if (userConfirmation) {
+                let pin = prompt("Please enter your admin PIN:");
+                
+                if (pin === "1876") {
                     fetch(`/delete-stage/${stageName}`, { method: 'DELETE' })
                         .then(response => response.json())
                         .then(data => {
@@ -320,8 +324,12 @@
                                 alert("Error deleting stage.");
                             }
                         });
+                } else {
+                    alert("Only admins can delete the stage.");
                 }
             }
+        }
+
 
             function startPress(event, stageName) {
                 // If the event is a right-click, prevent the default context menu from appearing
