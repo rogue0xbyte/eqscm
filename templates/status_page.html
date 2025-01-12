@@ -315,7 +315,7 @@
                 let pin = prompt("Please enter your admin PIN:");
                 
                 if (pin === "1876") {
-                    fetch(`/delete-stage/${stageName}`, { method: 'DELETE' })
+                    fetch(`/delete-stage/${stageName}/{{status_data['id']}}`, { method: 'DELETE' })
                         .then(response => response.json())
                         .then(data => {
                             if (data.message === 'Stage deleted successfully') {

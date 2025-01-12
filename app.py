@@ -110,17 +110,23 @@ async def add_or_update_item(request: Request):
 
     return JSONResponse(content={"message": message}, status_code=200)
 
-@app.delete("/delete-stage/{stage_name}")
-async def delete_stage(request: Request, stage_name: str):
-    # Delete the document where the key 'stage_name' exists
-    result = collection.delete_one({stage_name: {"$exists": True}})
+@app.delete("/delete-stage/{stage_name}/{item_name}")
+async def delete_stage(request: Request, stage_name: str, item_name: str):
+    # Find the document where the key 'stage_name' exists and contains 'item_name'
+    document = collection.find_one({stage_name: {"$exists": True}})
 
-    if result.deleted_count == 1:
-        # Redirect back to the referring page after deletion
-        return RedirectResponse(url=request.headers.get('referer'), status_code=303)
+    if document:
+        # Delete the specific item (key) in the stage
+        if item_name in document.get(stage_name, {}):
+            del document[stage_name][item_name]
+            # Update the document with the modified stage
+            collection.update_one({ "_id": document["_id"] }, {"$set": {stage_name: document[stage_name]}})
+            # Redirect back to the referring page after deletion
+            return RedirectResponse(url=request.headers.get('referer'), status_code=303)
+        else:
+            raise HTTPException(status_code=404, detail=f"Item '{item_name}' not found in stage '{stage_name}'")
     else:
         raise HTTPException(status_code=404, detail="Stage not found")
-
 
 if __name__ == "__main__":
     import uvicorn
