@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Page</title>
+    <link rel="stylesheet" href="https://intellx.in/static/fonts/stylesheet.css">
+    <style>
+        * {font-family: 'Aeonik'!important;}
+        /* Center all content on the page vertically and horizontally */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            padding: 10px; /* Extra padding for mobile responsiveness */
+            box-sizing: border-box;
+        }
+
+        .main {
+            margin: 10px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px; /* Limit max-width for better mobile appearance */
+            box-sizing: border-box;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table td:first-child {
+            font-weight: bold;
+        }
+
+        /* Button Styling - Material Design Inspired */
+        button {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            background-color: #e0e0e0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            background-color: #d6d6d6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Modal Styling */
+        #statusModal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); /* Black background with transparency */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal Content Box */
+        #statusModal .modal-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 80%; /* Modal width */
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Dropdown Styling */
+        #new_status {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            transition: border 0.3s, background-color 0.3s;
+        }
+
+        #new_status:hover {
+            background-color: #e9e9e9;
+        }
+
+        #new_status:focus {
+            border-color: #0066cc;
+            outline: none;
+        }
+
+        /* Stage Indicators Container */
+        .stage-indic-main {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        /* Stage Indicators */
+        .stage-indicator {
+            position: absolute;
+            width: 120px;
+            height: 40px;
+            text-align: center;
+            line-height: 20px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            background-color: transparent;
+            opacity: 0.8;
+            font: monospace;
+            font-size: 0.5em;
+        }
+
+        .dropped { background-color: green; }
+        .recd { background-color: green; }
+        .out-1 { background-color: green; }
+        .out-2 { background-color: green; }
+        .in-1 { background-color: green; }
+        .in-2 { background-color: green; }
+        .picked { background-color: green; }
+        .installed { background-color: green; }
+        .handover { background-color: green; }
+
+        /* Example Responsive Positioning */
+        .stage-indicator.dropped {
+            top: 25%;
+            left: 1.5%;
+            width: 20%;
+            height: 10%;
+        }
+
+        .stage-indicator.recd {
+            top: 25%;
+            left: 30%;
+            width: 10%;
+            height: 10%;
+        }
+
+        .stage-indicator.out-1 {
+            top: 25%;
+            left: 52%;
+            width: 10%;
+            height: 10%;
+        }
+
+        .stage-indicator.out-2 {
+            top: 32%;
+            left: 82%;
+            width: 10%;
+            height: 10%;
+        }
+
+        .stage-indicator.in-1 {
+            top: 25%;
+            left: 72%;
+            width: 7%;
+            height: 10%;
+        }
+
+        .stage-indicator.in-2 {
+            top: 41%;
+            left: 48%;
+            width: 10%;
+            height: 10%;
+        }
+
+        .stage-indicator.picked {
+            top: 55%;
+            left: 42%;
+            width: 22%;
+            height: 18%;
+            line-height: 12px;
+        }
+
+        .stage-indicator.installed {
+            top: 58%;
+            left: 22%;
+            width: 18%;
+            height: 10%;
+            line-height: 12px;
+        }
+
+        .stage-indicator.handover {
+            top: 52%;
+            left: 1.5%;
+            width: 18%;
+            height: 22%;
+            line-height: 12px;
+        }
+
+        /* Tooltip styling */
+        .stage-indicator::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            visibility: hidden;
+            opacity: 0;
+            background-color: #333;
+            color: #fff;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            white-space: nowrap;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        /* Show the tooltip when hovered */
+        .stage-indicator:hover::after {
+            visibility: visible;
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="main">
+        <h1>Status for TAG:<br/>{{ status_id }}</h1>
+
+        <div class="stage-indic-main">
+
+            <!-- Displaying the Image -->
+            <img src="/static/TRNARND-PROC.png" alt="Process Stages" style="width: 100%; max-width: 600px; margin-bottom: 20px;">
+
+            <!-- Stages -->
+            <div class="stages">
+                {% if 'Dropped' in status_data %}
+                    <div class="stage-indicator dropped" data-tooltip="{{status_data['Dropped']}}">DROPPED</div>
+                {% endif %}
+                
+                {% if 'Received in Laydown Area' in status_data %}
+                    <div class="stage-indicator recd" data-tooltip="{{status_data['Received in Laydown Area']}}">RECD</div>
+                {% endif %}
+                
+                {% if 'Send to Workshop' in status_data %}
+                    <div class="stage-indicator out-1" data-tooltip="{{status_data['Send to Workshop']}}">OUT</div>
+                {% endif %}
+                
+                {% if 'Received in Workshop' in status_data %}
+                    <div class="stage-indicator in-1" data-tooltip="{{status_data['Received in Workshop']}}">IN</div>
+                {% endif %}
+
+                {% if 'Out from Workshop' in status_data %}
+                    <div class="stage-indicator out-2" data-tooltip="{{status_data['Out from Workshop']}}">OUT</div>
+                {% endif %}
+                
+                {% if 'Received in Laydown Area after O/H' in status_data %}
+                    <div class="stage-indicator in-2" data-tooltip="{{status_data['Received in Laydown Area after O/H']}}">IN</div>
+                {% endif %}
+                
+                {% if 'Picked up for Installation' in status_data %}
+                    <div class="stage-indicator picked" data-tooltip="{{status_data['Picked up for Installation']}}">PICKED FOR INSTALLTN.</div>
+                {% endif %}
+                
+                {% if 'Installed' in status_data %}
+                    <div class="stage-indicator installed" data-tooltip="{{status_data['Installed']}}">INSTALLED</div>
+                {% endif %}
+                
+                {% if 'Final Handover to Operation' in status_data %}
+                    <div class="stage-indicator handover" data-tooltip="{{status_data['Final Handover to Operation']}}">HANDOVER TO OP.</div>
+                {% endif %}
+            </div>
+
+
+        </div>
+
+        {% if 'Final Handover to Operation' not in status_data %}
+
+        <button id="editStatusButton">Edit Status</button>
+
+        <div id="statusModal">
+            <div class="modal-content">
+                <form method="post">
+                    <label for="new_status">Select New Status:</label>
+                    <select name="new_status" id="new_status">
+
+                        {% if 'Dropped' not in status_data %}
+
+                        <option value="Dropped">Dropped</option>
+
+                        {% endif %}
+
+                        {% if 'Received in Laydown Area' not in status_data %}
+
+                        <option value="Received in Laydown Area">Received in Laydown Area</option>
+
+                        {% endif %}
+
+                        {% if 'Send to Workshop' not in status_data %}
+
+                        <option value="Send to Workshop">Send to Workshop</option>
+
+                        {% endif %}
+
+                        {% if 'Received in Workshop' not in status_data %}
+
+                        <option value="Received in Workshop">Received in Workshop</option>
+
+                        {% endif %}
+
+                        {% if 'Out from Workshop' not in status_data %}
+
+                        <option value="Out from Workshop">Out from Workshop</option>
+
+                        {% endif %}
+
+                        {% if 'Received in Laydown Area after O/H' not in status_data %}
+
+                        <option value="Received in Laydown Area after O/H">Received in Laydown Area after O/H</option>
+
+                        {% endif %}
+
+                        {% if 'Picked up for Installation' not in status_data %}
+
+                        <option value="Picked up for Installation">Picked up for Installation</option>
+
+                        {% endif %}
+
+                        {% if 'Installed' not in status_data %}
+
+                        <option value="Installed">Installed</option>
+
+                        {% endif %}
+
+                        {% if 'Final Handover to Operation' not in status_data %}
+
+                        <option value="Final Handover to Operation">Final Handover to Operation</option>
+
+                        {% endif %}
+                    </select>
+                    <br/><br/>
+                    <button type="submit" style="text-align: center;margin: 0 auto;">Confirm</button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // Open the modal
+            document.getElementById("editStatusButton").onclick = function() {
+                document.getElementById("statusModal").style.display = "flex";
+            }
+
+            // Close the modal if clicked outside
+            window.onclick = function(event) {
+                var modal = document.getElementById("statusModal");
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        </script>
+
+        {% endif %}
+
+        <!-- Status Table -->
+        <table>
+        {% for key, value in status_data.items() %}
+            <tr>
+                <td>{{key}}</td>
+                <td>{{value}}</td>
+            </tr>
+        {% endfor %}
+        </table>
+
+    </div>
+</body>
+</html>
