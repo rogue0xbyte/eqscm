@@ -114,14 +114,17 @@ async def add_or_update_item(request: Request):
 async def delete_stage(request: Request, item_name: str, stage_name: str):
     # Find the document where the key 'item_name' exists and contains 'stage_name'
     stage_name = stage_name.replace("_", " ")
-    document = collection.find_one({item_name: {"$exists": True}})
+    document = collection.find_one({"id": item_name})
 
     if document:
         # Delete the specific item (key) in the stage_name
-        if stage_name in document.get(item_name, {}):
-            del document[item_name][stage_name]
-            # Update the document with the modified stage_name
-            collection.update_one({ "_id": document["_id"] }, {"$set": {item_name: document[item_name]}})
+        if document.get(stage_name):
+            collection.update_one(
+                { "_id": document["_id"] }, 
+                {
+                    "$unset": { stage_name: "" }  # Remove the stage_name field
+                }
+            )
             # Redirect back to the referring page after deletion
             return RedirectResponse(url=request.headers.get('referer'), status_code=303)
         else:
