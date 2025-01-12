@@ -307,6 +307,11 @@
             let pressTimer;
 
             function startPress(event, stageName) {
+                // If the event is a right-click, prevent the default context menu from appearing
+                if (event.type === 'contextmenu') {
+                    event.preventDefault();
+                }
+
                 pressTimer = setTimeout(function() {
                     let userConfirmation = confirm(`Would you like to delete the ${stageName} stage record?`);
                     if (userConfirmation) {
@@ -326,6 +331,14 @@
             function endPress() {
                 clearTimeout(pressTimer); // Clear the timer if the press is released before 1 second
             }
+
+            // Add event listeners for both long press (mousedown) and right-click (contextmenu)
+            document.querySelectorAll('.stage').forEach(element => {
+                element.addEventListener('mousedown', (event) => startPress(event, event.target.dataset.stageName));
+                element.addEventListener('mouseup', endPress);
+                element.addEventListener('contextmenu', (event) => startPress(event, event.target.dataset.stageName));
+            });
+
         </script>
 
 
