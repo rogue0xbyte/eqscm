@@ -324,7 +324,7 @@
                             } else {
                                 alert("Error deleting stage.");
                             }
-                            location.reload();
+                            window.location.href = "https://eqscm.intellx.in/status/{{status_data['id']}}"
                         });
                 } else {
                     alert("Only admins can delete the stage.");
