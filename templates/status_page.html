@@ -260,47 +260,47 @@
             <div class="stages">
                 {% if 'Dropped' in status_data %}
                     <div class="stage-indicator dropped" data-tooltip="{{status_data['Dropped']}}" 
-                         onmousedown="startPress(event, 'Dropped')" onmouseup="endPress()">DROPPED</div>
+                         onmousedown="startPress(event, 'Dropped')" onmouseup="endPress()" oncontextmenu="delItem('Dropped')">DROPPED</div>
                 {% endif %}
 
                 {% if 'Received in Laydown Area' in status_data %}
                     <div class="stage-indicator recd" data-tooltip="{{status_data['Received in Laydown Area']}}" 
-                         onmousedown="startPress(event, 'Received in Laydown Area')" onmouseup="endPress()">RECD</div>
+                         onmousedown="startPress(event, 'Received in Laydown Area')" onmouseup="endPress()" oncontextmenu="delItem('Received in Laydown Area')">RECD</div>
                 {% endif %}
 
                 {% if 'Send to Workshop' in status_data %}
                     <div class="stage-indicator out-1" data-tooltip="{{status_data['Send to Workshop']}}" 
-                         onmousedown="startPress(event, 'Send to Workshop')" onmouseup="endPress()">OUT</div>
+                         onmousedown="startPress(event, 'Send to Workshop')" onmouseup="endPress()" oncontextmenu="delItem('Send to Workshop')">OUT</div>
                 {% endif %}
 
                 {% if 'Received in Workshop' in status_data %}
                     <div class="stage-indicator in-1" data-tooltip="{{status_data['Received in Workshop']}}" 
-                         onmousedown="startPress(event, 'Received in Workshop')" onmouseup="endPress()">IN</div>
+                         onmousedown="startPress(event, 'Received in Workshop')" onmouseup="endPress()" oncontextmenu="delItem('Received in Workshop')">IN</div>
                 {% endif %}
 
                 {% if 'Out from Workshop' in status_data %}
                     <div class="stage-indicator out-2" data-tooltip="{{status_data['Out from Workshop']}}" 
-                         onmousedown="startPress(event, 'Out from Workshop')" onmouseup="endPress()">OUT</div>
+                         onmousedown="startPress(event, 'Out from Workshop')" onmouseup="endPress()" oncontextmenu="delItem('Out from Workshop')">OUT</div>
                 {% endif %}
 
                 {% if 'Received in Laydown Area after O/H' in status_data %}
                     <div class="stage-indicator in-2" data-tooltip="{{status_data['Received in Laydown Area after O/H']}}" 
-                         onmousedown="startPress(event, 'Received in Laydown Area after O/H')" onmouseup="endPress()">IN</div>
+                         onmousedown="startPress(event, 'Received in Laydown Area after O/H')" onmouseup="endPress()" oncontextmenu="delItem('Received in Laydown Area after O/H')">IN</div>
                 {% endif %}
 
                 {% if 'Picked up for Installation' in status_data %}
                     <div class="stage-indicator picked" data-tooltip="{{status_data['Picked up for Installation']}}" 
-                         onmousedown="startPress(event, 'Picked up for Installation')" onmouseup="endPress()">PICKED FOR INSTALLTN.</div>
+                         onmousedown="startPress(event, 'Picked up for Installation')" onmouseup="endPress()" oncontextmenu="delItem('Picked up for Installation')">PICKED FOR INSTALLTN.</div>
                 {% endif %}
 
                 {% if 'Installed' in status_data %}
                     <div class="stage-indicator installed" data-tooltip="{{status_data['Installed']}}" 
-                         onmousedown="startPress(event, 'Installed')" onmouseup="endPress()">INSTALLED</div>
+                         onmousedown="startPress(event, 'Installed')" onmouseup="endPress()" oncontextmenu="delItem('Installed')">INSTALLED</div>
                 {% endif %}
 
                 {% if 'Final Handover to Operation' in status_data %}
                     <div class="stage-indicator handover" data-tooltip="{{status_data['Final Handover to Operation']}}" 
-                         onmousedown="startPress(event, 'Final Handover to Operation')" onmouseup="endPress()">HANDOVER TO OP.</div>
+                         onmousedown="startPress(event, 'Final Handover to Operation')" onmouseup="endPress()" oncontextmenu="delItem('Final Handover to Operation')">HANDOVER TO OP.</div>
                 {% endif %}
             </div>
         </div>
@@ -308,26 +308,32 @@
         <script>
             let pressTimer;
 
+            function delItem(stageName){
+                let userConfirmation = confirm(`Would you like to delete the ${stageName} stage record?`);
+                if (userConfirmation) {
+                    fetch(`/delete-stage/${stageName}`, { method: 'DELETE' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message === 'Stage deleted successfully') {
+                                alert("Stage deleted successfully!");
+                            } else {
+                                alert("Error deleting stage.");
+                            }
+                        });
+                }
+            }
+
             function startPress(event, stageName) {
                 // If the event is a right-click, prevent the default context menu from appearing
                 if (event.type === 'contextmenu') {
                     event.preventDefault();
-                }
+                    delItem(stageName);
+                } else{
 
-                pressTimer = setTimeout(function() {
-                    let userConfirmation = confirm(`Would you like to delete the ${stageName} stage record?`);
-                    if (userConfirmation) {
-                        fetch(`/delete-stage/${stageName}`, { method: 'DELETE' })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.message === 'Stage deleted successfully') {
-                                    alert("Stage deleted successfully!");
-                                } else {
-                                    alert("Error deleting stage.");
-                                }
-                            });
-                    }
-                }, 1000); // 1 second long press threshold
+                    pressTimer = setTimeout(function() {
+                        delItem(stageName);
+                    }, 1000); // 1 second long press threshold
+                }
             }
 
             function endPress() {
