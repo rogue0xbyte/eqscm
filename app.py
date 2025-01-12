@@ -110,7 +110,7 @@ async def add_or_update_item(request: Request):
 
     return JSONResponse(content={"message": message}, status_code=200)
 
-@app.delete("/delete-stage/{stage_name}/{item_name}")
+@app.delete("/delete-stage")
 async def delete_stage(request: Request, stage_name: str, item_name: str):
     # Find the document where the key 'stage_name' exists and contains 'item_name'
     stage_name = stage_name.replace("_", " ")
