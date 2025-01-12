@@ -126,7 +126,7 @@ async def delete_stage(request: Request, item_name: str, stage_name: str):
                 }
             )
             # Redirect back to the referring page after deletion
-            return RedirectResponse(url=request.headers.get('referer'), status_code=303)
+            return {"message": "Stage deleted successfully"}
         else:
             raise HTTPException(status_code=404, detail=f"Stage '{stage_name}' not found in item '{item_name}'")
     else:

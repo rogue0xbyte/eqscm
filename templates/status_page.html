@@ -319,12 +319,12 @@
                     fetch(`/delete-stage?stage_name=${stageName}&item_name={{status_data['id']}}`, { method: 'DELETE' })
                         .then(response => response.json())
                         .then(data => {
-                            window.reload();
                             if (data.message === 'Stage deleted successfully') {
                                 alert("Stage deleted successfully!");
                             } else {
                                 alert("Error deleting stage.");
                             }
+                            window.reload();
                         });
                 } else {
                     alert("Only admins can delete the stage.");
