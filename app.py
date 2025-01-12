@@ -110,6 +110,17 @@ async def add_or_update_item(request: Request):
 
     return JSONResponse(content={"message": message}, status_code=200)
 
+@app.delete("/delete-stage/{stage_name}")
+async def delete_stage(request: Request, stage_name: str):
+    # Delete the document where the key 'stage_name' exists
+    result = collection.delete_one({stage_name: {"$exists": True}})
+
+    if result.deleted_count == 1:
+        # Redirect back to the referring page after deletion
+        return RedirectResponse(url=request.headers.get('referer'), status_code=303)
+    else:
+        raise HTTPException(status_code=404, detail="Stage not found")
+
 
 if __name__ == "__main__":
     import uvicorn
