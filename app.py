@@ -111,21 +111,21 @@ async def add_or_update_item(request: Request):
     return JSONResponse(content={"message": message}, status_code=200)
 
 @app.delete("/delete-stage")
-async def delete_stage(request: Request, stage_name: str, item_name: str):
-    # Find the document where the key 'stage_name' exists and contains 'item_name'
+async def delete_stage(request: Request, item_name: str, stage_name: str):
+    # Find the document where the key 'item_name' exists and contains 'stage_name'
     stage_name = stage_name.replace("_", " ")
-    document = collection.find_one({stage_name: {"$exists": True}})
+    document = collection.find_one({item_name: {"$exists": True}})
 
     if document:
-        # Delete the specific item (key) in the stage
-        if item_name in document.get(stage_name, {}):
-            del document[stage_name][item_name]
-            # Update the document with the modified stage
-            collection.update_one({ "_id": document["_id"] }, {"$set": {stage_name: document[stage_name]}})
+        # Delete the specific item (key) in the stage_name
+        if stage_name in document.get(item_name, {}):
+            del document[item_name][stage_name]
+            # Update the document with the modified stage_name
+            collection.update_one({ "_id": document["_id"] }, {"$set": {item_name: document[item_name]}})
             # Redirect back to the referring page after deletion
             return RedirectResponse(url=request.headers.get('referer'), status_code=303)
         else:
-            raise HTTPException(status_code=404, detail=f"Item '{item_name}' not found in stage '{stage_name}'")
+            raise HTTPException(status_code=404, detail=f"Stage '{stage_name}' not found in item '{item_name}'")
     else:
         raise HTTPException(status_code=404, detail="Stage not found")
 
