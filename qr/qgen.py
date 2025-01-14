@@ -98,7 +98,7 @@ def main():
             continue
 
         # Generate QR code image
-        qr_image = generate_qr_image(cleaned_data.get("Equipment TAG No"), f"{job_id}", cleaned_data.get("Work Order No"), f'https://eqscm.intellx.in/status/{cleaned_data.get("Equipment TAG No")}')
+        qr_image = generate_qr_image(cleaned_data.get("Equipment TAG No"), f"{job_id}", cleaned_data.get("Work Order No"), f'https://eqscm.intellx.in/status/{job_id}')
 
         # Save the QR code image
         qr_image.save(f"{output_directory}{job_id}.png")
