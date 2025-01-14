@@ -29,10 +29,16 @@ def get_current_time_gmt3():
 # Route to Render Status Page with Edit Option
 @app.get("/status/{id}", response_class=HTMLResponse)
 async def get_status_page(id: str, request: Request):
+
+
+    if id[:3] not in ["EG1", "ASP", "DMO"]:
+        return JSONResponse(content={"error": "Incorrect Job ID."}, status_code=400)
+
     status_object = collection.find_one({"id": id})
 
     if status_object:
         status_object.pop("_id", None)
+
     else:
         # Create New Object if Not Found
         status_object = {"id": id, "created": get_current_time_gmt3()}
@@ -43,6 +49,11 @@ async def get_status_page(id: str, request: Request):
 # Route to Handle Status Update
 @app.post("/status/{id}")
 async def update_status(id: str, request: Request, new_status: str = Form(...)):
+
+
+    if id[:3] not in ["EG1", "ASP", "DMO"]:
+        return JSONResponse(content={"error": "Incorrect Job ID."}, status_code=400)
+
     collection.update_one(
         {"id": id},
         {"$set": {new_status: get_current_time_gmt3()}}
@@ -55,44 +66,19 @@ async def update_status(id: str, request: Request, new_status: str = Form(...)):
 
     return templates.TemplateResponse("status_page.html", {"request": request, "status_id": id, "status_data": reversed_status_object})
 
-# Route to Export Data as XLSX
-@app.get("/export")
-async def export_data():
-    data = list(collection.find())
-
-    # Remove "_id" from all objects and rename "id" to "Equipment TAG No"
-    for item in data:
-        item.pop("_id", None)
-        if "id" in item:
-            item["Equipment TAG No"] = item.pop("id")
-
-    # Prepare DataFrame
-    df = pd.DataFrame(data)
-
-    # Convert DataFrame to XLSX in Memory
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-        df.to_excel(writer, index=False, sheet_name="StatusData")
-
-    output.seek(0)
-    headers = {
-        'Content-Disposition': 'attachment; filename="status_data.xlsx"',
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    }
-
-    return StreamingResponse(output, headers=headers)
-
 # Route to Add or Update Item
 @app.post("/add-item")
 async def add_or_update_item(request: Request):
     new_item_data = await request.json()
 
-    # Ensure "Equipment TAG No" key exists
-    if "Equipment TAG No" not in new_item_data:
-        return JSONResponse(content={"error": "Missing 'Equipment TAG No' in the request."}, status_code=400)
+    # Ensure "Job ID" key exists
+    if "Job ID" not in new_item_data:
+        return JSONResponse(content={"error": "Missing 'Job ID' in the request."}, status_code=400)
 
-    # Rename "Equipment TAG No" back to "id" for database storage
-    new_item_data["id"] = new_item_data.pop("Equipment TAG No")
+    # Rename "Job ID" back to "id" for database storage
+    new_item_data["id"] = new_item_data.pop("Job ID")
+    if new_item_data["id"][:3] not in ["EG1", "ASP", "DMO"]:
+        return JSONResponse(content={"error": "Incorrect Job ID."}, status_code=400)
     new_item_data["updated"] = get_current_time_gmt3()
 
     existing_item = collection.find_one({"id": new_item_data["id"]})
@@ -132,6 +118,33 @@ async def delete_stage(request: Request, item_name: str, stage_name: str):
     else:
         raise HTTPException(status_code=404, detail="Stage not found")
 
+
+# Route to Export Data as XLSX
+@app.get("/export")
+async def export_data():
+    data = list(collection.find())
+
+    # Remove "_id" from all objects and rename "id" to "Job ID"
+    for item in data:
+        item.pop("_id", None)
+        if "id" in item:
+            item["Job ID"] = item.pop("id")
+
+    # Prepare DataFrame
+    df = pd.DataFrame(data)
+
+    # Convert DataFrame to XLSX in Memory
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False, sheet_name="StatusData")
+
+    output.seek(0)
+    headers = {
+        'Content-Disposition': 'attachment; filename="status_data.xlsx"',
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }
+
+    return StreamingResponse(output, headers=headers)
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=9000)

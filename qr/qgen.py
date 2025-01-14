@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 # Configuration
 file_path = "TA 25 EG1ASP.xlsx"
-output_directory = "./qrs-new/"
+output_directory = "./qrs/"
 qr_code_size = (300, 300)  # Size for individual QR codes
 
 def clean_row(row):
@@ -54,12 +54,12 @@ def generate_qr_image(equipment_tag, job_id, wo_id, link):
     # Add Equipment TAG, Job ID, and WO ID below QR code without cropping
     draw = ImageDraw.Draw(img)
     
-    font_size = 20  # Initial font size
+    font_size = 35  # Initial font size
     font = ImageFont.load_default(font_size)
 
     # Text to be added below the QR code
     equipment_text = f"TAG: {equipment_tag}"
-    job_id_text = f"JOB ID: {job_id}"
+    job_id_text = f"JOB ID: {job_id.replace('--','/')}"
     wo_id_text = f"WO: {wo_id}"
 
     # Combine the text lines into one string for easy bounding box calculation
@@ -76,7 +76,7 @@ def generate_qr_image(equipment_tag, job_id, wo_id, link):
 
     # Draw the text below the QR code
     draw = ImageDraw.Draw(img_with_text)
-    draw.text(((img.width - text_width) // 2, img.height - 2), full_text, fill="black", font=font)
+    draw.text(((img.width - text_width - 3) // 2, img.height - 30), full_text, fill="black", font=font)
 
     return img_with_text
 
@@ -87,25 +87,22 @@ def main():
     # Load Excel data
     df = pd.read_excel(file_path)
 
-    existing_codes = [i.replace(".png","").replace("_qr","").strip() for i in os.listdir("qrs")]
-
     # Iterate over rows
     for idx, row in df.iterrows():
         cleaned_data = clean_row(row.to_dict())
 
-        # Skip if mandatory 'Equipment TAG No.' is missing
-        equipment_tag = cleaned_data.get("Equipment TAG No")
-        if not equipment_tag:
-            print("Skipping row due to missing Equipment TAG No.")
+        # Skip if mandatory 'Job ID' is missing
+        job_id = cleaned_data.get("Job ID").replace("/","--")
+        if not job_id:
+            print("Skipping row due to missing Job ID.")
             continue
-        if equipment_tag not in existing_codes:
 
-            # Generate QR code image
-            qr_image = generate_qr_image(equipment_tag, cleaned_data.get("Job ID"), cleaned_data.get("Work Order No"), f'https://eqscm.intellx.in/status/{cleaned_data.get("Equipment TAG No")}')
+        # Generate QR code image
+        qr_image = generate_qr_image(cleaned_data.get("Equipment TAG No"), f"{job_id}", cleaned_data.get("Work Order No"), f'https://eqscm.intellx.in/status/{cleaned_data.get("Equipment TAG No")}')
 
-            # Save the QR code image
-            qr_image.save(f"{output_directory}{equipment_tag}_qr.png")
-            print(f"QR Code for {equipment_tag} saved.")
+        # Save the QR code image
+        qr_image.save(f"{output_directory}{job_id}.png")
+        print(f"QR Code for {job_id} saved.")
 
 if __name__ == "__main__":
     main()
