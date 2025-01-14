@@ -369,64 +369,84 @@
                 <form method="post">
                     <label for="new_status">Select New Status:</label>
                     <select name="new_status" id="new_status">
-
                         {% if 'Dropped' not in status_data %}
-
                         <option value="Dropped">Dropped</option>
-
                         {% endif %}
-
+                        
                         {% if 'Received in Laydown Area' not in status_data %}
-
                         <option value="Received in Laydown Area">Received in Laydown Area</option>
-
                         {% endif %}
-
+                        
                         {% if 'Send to Workshop' not in status_data %}
-
                         <option value="Send to Workshop">Send to Workshop</option>
-
                         {% endif %}
-
+                        
                         {% if 'Received in Workshop' not in status_data %}
-
                         <option value="Received in Workshop">Received in Workshop</option>
-
                         {% endif %}
-
+                        
                         {% if 'Out from Workshop' not in status_data %}
-
                         <option value="Out from Workshop">Out from Workshop</option>
-
                         {% endif %}
-
+                        
                         {% if 'Received in Laydown Area after O/H' not in status_data %}
-
                         <option value="Received in Laydown Area after O/H">Received in Laydown Area after O/H</option>
-
                         {% endif %}
-
+                        
                         {% if 'Picked up for Installation' not in status_data %}
-
                         <option value="Picked up for Installation">Picked up for Installation</option>
-
                         {% endif %}
-
+                        
                         {% if 'Installed' not in status_data %}
-
                         <option value="Installed">Installed</option>
-
                         {% endif %}
-
+                        
                         {% if 'Final Handover to Operation' not in status_data %}
-
                         <option value="Final Handover to Operation">Final Handover to Operation</option>
-
                         {% endif %}
                     </select>
                     <br/><br/>
                     <button type="submit" style="text-align: center;margin: 0 auto;">Confirm</button>
+                    
+                    <!-- PIN Display Area -->
+                    <div id="pinDisplay" style="margin-top: 20px; font-weight: bold;">
+                        Selected PIN: <span id="pinCode">None</span>
+                    </div>
                 </form>
+
+                <script>
+                    // Object mapping statuses to their corresponding PINs
+                    const statusPinMapping = {
+                        'Dropped': 'DR01',
+                        'Received in Laydown Area': 'LD01',
+                        'Send to Workshop': 'LD02',
+                        'Received in Workshop': 'WS01',
+                        'Out from Workshop': 'WS02',
+                        'Received in Laydown Area after O/H': 'LD03',
+                        'Picked up for Installation': 'IN01',
+                        'Installed': 'IN02',
+                        'Final Handover to Operation': 'HO01'
+                    };
+
+                    // Get the select element and pin display area
+                    const statusSelect = document.getElementById('new_status');
+                    const pinDisplay = document.getElementById('pinDisplay');
+                    const pinCodeElement = document.getElementById('pinCode');
+
+                    // Function to update the PIN based on selected status
+                    function updatePin() {
+                        const selectedStatus = statusSelect.value;
+                        const pin = statusPinMapping[selectedStatus] || 'None'; // Default to 'None' if no matching status
+                        pinCodeElement.textContent = pin; // Update the PIN display
+                    }
+
+                    // Add event listener to update PIN when status changes
+                    statusSelect.addEventListener('change', updatePin);
+
+                    // Call updatePin on page load to display the PIN for the default selected status
+                    window.onload = updatePin;
+                </script>
+
             </div>
         </div>
 

@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 # Configuration
 file_path = "TA 25 EG1ASP.xlsx"
-output_directory = "./qrs/"
+output_directory = "./qrs-new/"
 qr_code_size = (300, 300)  # Size for individual QR codes
 
 def clean_row(row):
@@ -96,13 +96,15 @@ def main():
         if not equipment_tag:
             print("Skipping row due to missing Equipment TAG No.")
             continue
+        if equipment_tag in ["MXK-FV-6811-09", "MXK-FV-6851-05", "MXK-FV-6213-01", "MXK-HV-8300-39", "MXK-FV-6733-01",
+                                "MXK-HV-6718-02", "MXK-PSV-6780-800R", "MXK-FV-6811-09"]:
 
-        # Generate QR code image
-        qr_image = generate_qr_image(equipment_tag, cleaned_data.get("Job ID"), cleaned_data.get("Work Order No"), f'https://eqscm.intellx.in/status/{cleaned_data.get("Equipment TAG No")}')
+            # Generate QR code image
+            qr_image = generate_qr_image(equipment_tag, cleaned_data.get("Job ID"), cleaned_data.get("Work Order No"), f'https://eqscm.intellx.in/status/{cleaned_data.get("Equipment TAG No")}')
 
-        # Save the QR code image
-        qr_image.save(f"{output_directory}{equipment_tag}_qr.png")
-        print(f"QR Code for {equipment_tag} saved.")
+            # Save the QR code image
+            qr_image.save(f"{output_directory}{equipment_tag}_qr.png")
+            print(f"QR Code for {equipment_tag} saved.")
 
 if __name__ == "__main__":
     main()
