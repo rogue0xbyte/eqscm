@@ -366,7 +366,7 @@
 
         <div id="statusModal">
             <div class="modal-content">
-                <form method="post">
+                <form method="post" id="statusForm" onsubmit="return validatePin()">
                     <label for="new_status">Select New Status:</label>
                     <select name="new_status" id="new_status">
                         {% if 'Dropped' not in status_data %}
@@ -409,8 +409,9 @@
                     <button type="submit" style="text-align: center;margin: 0 auto;">Confirm</button>
                     
                     <!-- PIN Display Area -->
-                    <div id="pinDisplay" style="margin-top: 20px; font-weight: bold;">
-                        Selected PIN: <span id="pinCode">None</span>
+                    <div id="pinInputArea" style="margin-top: 20px; font-weight: bold;">
+                        Enter PIN: <input type="password" id="pinCodeInput" placeholder="Enter PIN">
+                        <span id="pinErrorMessage" style="color: red; display: none;">Incorrect PIN</span>
                     </div>
                 </form>
 
@@ -428,23 +429,43 @@
                         'Final Handover to Operation': 'HO01'
                     };
 
-                    // Get the select element and pin display area
+                    // Get the select element and PIN input field
                     const statusSelect = document.getElementById('new_status');
-                    const pinDisplay = document.getElementById('pinDisplay');
-                    const pinCodeElement = document.getElementById('pinCode');
+                    const pinCodeInput = document.getElementById('pinCodeInput');
+                    const pinErrorMessage = document.getElementById('pinErrorMessage');
 
-                    // Function to update the PIN based on selected status
-                    function updatePin() {
+                    // Function to update the expected PIN based on selected status
+                    function getExpectedPin() {
                         const selectedStatus = statusSelect.value;
-                        const pin = statusPinMapping[selectedStatus] || 'None'; // Default to 'None' if no matching status
-                        pinCodeElement.textContent = pin; // Update the PIN display
+                        return statusPinMapping[selectedStatus] || 'None'; // Default to 'None' if no matching status
                     }
 
-                    // Add event listener to update PIN when status changes
-                    statusSelect.addEventListener('change', updatePin);
+                    // Function to validate PIN input
+                    function validatePin() {
+                        const enteredPin = pinCodeInput.value;
+                        const expectedPin = getExpectedPin();
 
-                    // Call updatePin on page load to display the PIN for the default selected status
-                    window.onload = updatePin;
+                        // Check if the entered PIN matches the expected one
+                        if (enteredPin === expectedPin) {
+                            return true; // Allow form submission
+                        } else {
+                            pinErrorMessage.style.display = 'inline'; // Show error message
+                            return false; // Prevent form submission
+                        }
+                    }
+
+                    // Add event listener to update the expected PIN when status changes
+                    statusSelect.addEventListener('change', () => {
+                        // Reset the error message when the status is changed
+                        pinErrorMessage.style.display = 'none';
+                        pinCodeInput.value = ''; // Clear the PIN input
+                    });
+
+                    // Call getExpectedPin on page load to set the expected PIN based on the default selected status
+                    window.onload = () => {
+                        pinCodeInput.value = ''; // Ensure the PIN input is cleared initially
+                        pinErrorMessage.style.display = 'none'; // Hide error message initially
+                    };
                 </script>
 
             </div>
