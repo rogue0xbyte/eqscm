@@ -1,5 +1,5 @@
 import pandas as pd
-import qrcode
+import qrcode, os
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer, GappedSquareModuleDrawer
 from qrcode.image.styles.colormasks import RadialGradiantColorMask
@@ -87,6 +87,8 @@ def main():
     # Load Excel data
     df = pd.read_excel(file_path)
 
+    existing_codes = [i.replace(".png","").replace("_qr","").strip() for i in os.listdir("qrs")]
+
     # Iterate over rows
     for idx, row in df.iterrows():
         cleaned_data = clean_row(row.to_dict())
@@ -96,8 +98,7 @@ def main():
         if not equipment_tag:
             print("Skipping row due to missing Equipment TAG No.")
             continue
-        if equipment_tag in ["MXK-FV-6811-09", "MXK-FV-6851-05", "MXK-FV-6213-01", "MXK-HV-8300-39", "MXK-FV-6733-01",
-                                "MXK-HV-6718-02", "MXK-PSV-6780-800R", "MXK-FV-6811-09"]:
+        if equipment_tag not in existing_codes:
 
             # Generate QR code image
             qr_image = generate_qr_image(equipment_tag, cleaned_data.get("Job ID"), cleaned_data.get("Work Order No"), f'https://eqscm.intellx.in/status/{cleaned_data.get("Equipment TAG No")}')

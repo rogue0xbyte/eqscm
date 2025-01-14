@@ -442,14 +442,18 @@
 
                     // Function to validate PIN input
                     function validatePin() {
-                        const enteredPin = pinCodeInput.value;
-                        const expectedPin = getExpectedPin();
+                        const enteredPin = pinCodeInput.value.toLowerCase(); // Convert entered PIN to lowercase
+                        const expectedPin = getExpectedPin().toLowerCase();  // Convert expected PIN to lowercase
 
-                        // Check if the entered PIN matches the expected one
+                        // Check if the entered PIN matches the expected one (case-insensitive)
                         if (enteredPin === expectedPin) {
                             return true; // Allow form submission
                         } else {
                             pinErrorMessage.style.display = 'inline'; // Show error message
+                            // Hide error message after 2 seconds
+                            setTimeout(() => {
+                                pinErrorMessage.style.display = 'none';
+                            }, 2000); // 2000 ms = 2 seconds
                             return false; // Prevent form submission
                         }
                     }
@@ -466,6 +470,8 @@
                         pinCodeInput.value = ''; // Ensure the PIN input is cleared initially
                         pinErrorMessage.style.display = 'none'; // Hide error message initially
                     };
+
+
                 </script>
 
             </div>
