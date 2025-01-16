@@ -135,7 +135,7 @@ async def export_data():
     df = pd.DataFrame(data)
 
     # Filter out rows where "Unit" is "DMO"
-    df = df[df["Unit"] != "DMO"]
+    # df = df[df["Unit"] != "DMO"]
 
     # Convert DataFrame to XLSX in Memory
     output = io.BytesIO()
