@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valve Tracker</title>
+    <link rel="stylesheet" href="https://intellx.in/static/fonts/stylesheet.css">
+    <link rel="shortcut icon" href="https://www.equate.com/wp-content/uploads/2018/07/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://www.equate.com/wp-content/uploads/2018/07/favicon.ico" type="image/x-icon">
+    <style>
+        * {font-family: 'Aeonik'!important;}
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .valve-summary {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        table td:first-child {
+            font-weight: bold;
+        }
+        .stage-count {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 80%;
+        }
+        .close {
+            background: #ccc;
+            border: none;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .close:hover {
+            background-color: #aaa;
+        }
+        /* Button Styling - Material Design Inspired */
+        button {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            background-color: #e0e0e0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            background-color: #d6d6d6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Valve Tracker</h1>
+        
+        <div class="valve-summary">
+            <p><strong>Total Valves:</strong> {{ total_valves }}</p>
+        </div>
+        
+        <table>
+            <tr>
+                <td><strong>Stage Name</strong></td>
+                <td><strong>Valve Count</strong></td>
+            </tr>
+            {% for stage in stage_counts %}
+            <tr>
+                <td>{{ stage.stage }}</td>
+                <td><span class="stage-count" style="text-decoration: none; color: inherit;" onclick="showModal([
+                    {% for i in stage.details['items'] %}
+                        '{{i}}',
+                    {% endfor %}
+                ])">{{ stage.details.count }}</span></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br/>
+        <button onclick="history.back();">Back</button>
+        <br/>
+        <div style="text-align: center;">
+            <br/><hr/>
+            Turnaround Valve Tracker<br/>
+            Made with ♥ by Aaditya Rengarajan.
+            <hr/><br/>
+        </div>
+    </div>
+
+    <!-- Modal to show the detailed information for each stage -->
+    <div id="valveModal" class="modal">
+        <div class="modal-content">
+            <h2>Stage Details</h2>
+            <p id="modalContent" style="max-height: 30vh!important;overflow-y: scroll;">Loading...</p>
+            <button class="close" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+
+    <script>
+        // Function to open the modal with stage details
+        function showModal(stageItems) {            
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = '';
+            const ul = document.createElement('ul');
+            stageItems.forEach(item => {
+              const li = document.createElement('li');
+              li.textContent = item;
+              ul.appendChild(li);
+            });
+            modalContent.appendChild(ul);
+            document.getElementById('valveModal').style.display = 'flex';
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            document.getElementById('valveModal').style.display = 'none';
+        }
+        
+        // Close modal when clicked outside the modal content
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('valveModal')) {
+                closeModal();
+            }
+        }
+    </script>
+
+</body>
+</html>

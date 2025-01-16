@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from typing import List, Dict
 from datetime import datetime, timezone, timedelta
 from collections import OrderedDict
 from bson.objectid import ObjectId
@@ -133,6 +134,9 @@ async def export_data():
     # Prepare DataFrame
     df = pd.DataFrame(data)
 
+    # Filter out rows where "Unit" is "DMO"
+    df = df[df["Unit"] != "DMO"]
+
     # Convert DataFrame to XLSX in Memory
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
@@ -145,6 +149,52 @@ async def export_data():
     }
 
     return StreamingResponse(output, headers=headers)
+
+# Define a route to get the required data
+@app.get("/valves-summary", response_model=dict)
+async def get_valves_summary(request: Request):
+    """
+    Fetch the total number of valves and classify items by the latest datetime-based key.
+    """
+    try:
+        # Fetch all documents from the collection
+        data = list(collection.find())
+
+        # Initialize variables for summary
+        stage_counts = {}
+        total_valves = len(data)
+
+        # Process each document
+        for item in data:
+            latest_stage = None
+            latest_datetime = None
+
+            # Iterate over key-value pairs to identify datetime fields
+            for key, value in item.items():
+                try:
+                    if isinstance(value, str) and (parsed_date := datetime.strptime(value, "%Y-%m-%d %H:%M:%S")):  # Check if the value is a datetime
+                        if not latest_datetime or value > latest_datetime:
+                            latest_datetime = value
+                            latest_stage = key
+                except:
+                    continue
+
+            # Classify by the latest stage
+            if not stage_counts.get(latest_stage):
+                stage_counts[latest_stage] = {"count": 0, "items": []}
+            if latest_stage:
+                stage_counts[latest_stage]["count"] = stage_counts.get(latest_stage, {"count": 0}).get('count') + 1
+                stage_counts[latest_stage]["items"].append(item.get("id"))
+            else:
+                stage_counts["Pending"]["count"] = stage_counts.get("Pending",  {"count": 0}).get("count") + 1
+                stage_counts["Pending"]["items"].append(item.get("id"))
+
+        return templates.TemplateResponse("valve_details.html", {"request": request, "total_valves": total_valves,
+            "stage_counts": [{"stage": stage, "details": count} for stage, count in stage_counts.items()]})
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=9000)

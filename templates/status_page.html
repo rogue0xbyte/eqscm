@@ -144,7 +144,6 @@
             font-size: 0.5em;
         }
 
-        .dropped { background-color: green; }
         .recd { background-color: green; }
         .out-1 { background-color: green; }
         .out-2 { background-color: green; }
@@ -155,13 +154,6 @@
         .handover { background-color: green; }
 
         /* Example Responsive Positioning */
-        .stage-indicator.dropped {
-            top: 25%;
-            left: 1.5%;
-            width: 20%;
-            height: 10%;
-        }
-
         .stage-indicator.recd {
             top: 25%;
             left: 30%;
@@ -258,11 +250,6 @@
 
             <!-- Stages -->
             <div class="stages">
-                {% if 'Dropped' in status_data %}
-                    <div class="stage-indicator dropped" data-tooltip="{{status_data['Dropped']}}" 
-                         onmousedown="startPress(event, 'Dropped')" onmouseup="endPress()" oncontextmenu="delItem('Dropped')">DROPPED</div>
-                {% endif %}
-
                 {% if 'Received in Laydown Area' in status_data %}
                     <div class="stage-indicator recd" data-tooltip="{{status_data['Received in Laydown Area']}}" 
                          onmousedown="startPress(event, 'Received in Laydown Area')" onmouseup="endPress()" oncontextmenu="delItem('Received in Laydown Area')">RECD</div>
@@ -364,15 +351,14 @@
 
         <button id="editStatusButton">Edit Status</button>
 
+        <button id="downloadExcelButton"><a href="/export" style="color: inherit; text-decoration: none;">Download Excel</a></button>
+        <button id="valveSummaryPage"><a href="/valves-summary" style="color: inherit; text-decoration: none;">Valve Summary</a></button>
+
         <div id="statusModal">
             <div class="modal-content">
                 <form method="post" id="statusForm" onsubmit="return validatePin()">
                     <label for="new_status">Select New Status:</label>
                     <select name="new_status" id="new_status">
-                        {% if 'Dropped' not in status_data %}
-                        <option value="Dropped">Dropped</option>
-                        {% endif %}
-                        
                         {% if 'Received in Laydown Area' not in status_data %}
                         <option value="Received in Laydown Area">Received in Laydown Area</option>
                         {% endif %}
