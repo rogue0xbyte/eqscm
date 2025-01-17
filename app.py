@@ -32,7 +32,7 @@ def get_current_time_gmt3():
 async def get_status_page(id: str, request: Request):
 
 
-    if id[:3] not in ["EG1", "ASP", "DMO"]:
+    if id[:3] not in ["EG1", "ASP"]:
         return JSONResponse(content={"error": "Incorrect Job ID."}, status_code=400)
 
     status_object = collection.find_one({"id": id})
@@ -42,7 +42,7 @@ async def get_status_page(id: str, request: Request):
 
     else:
         # Create New Object if Not Found
-        status_object = {"id": id, "created": get_current_time_gmt3()}
+        status_object = {"id": id, "Not Started": get_current_time_gmt3()}
         collection.insert_one(status_object)
 
     return templates.TemplateResponse("status_page.html", {"request": request, "status_id": id, "status_data": status_object})
@@ -52,7 +52,7 @@ async def get_status_page(id: str, request: Request):
 async def update_status(id: str, request: Request, new_status: str = Form(...)):
 
 
-    if id[:3] not in ["EG1", "ASP", "DMO"]:
+    if id[:3] not in ["EG1", "ASP"]:
         return JSONResponse(content={"error": "Incorrect Job ID."}, status_code=400)
 
     collection.update_one(
@@ -78,7 +78,7 @@ async def add_or_update_item(request: Request):
 
     # Rename "Job ID" back to "id" for database storage
     new_item_data["id"] = new_item_data.pop("Job ID")
-    if new_item_data["id"][:3] not in ["EG1", "ASP", "DMO"]:
+    if new_item_data["id"][:3] not in ["EG1", "ASP"]:
         return JSONResponse(content={"error": "Incorrect Job ID."}, status_code=400)
     new_item_data["updated"] = get_current_time_gmt3()
 
@@ -91,7 +91,7 @@ async def add_or_update_item(request: Request):
         )
         message = "Item updated successfully."
     else:
-        new_item_data["created"] = new_item_data["updated"]
+        new_item_data["Not Started"] = new_item_data["updated"]
         collection.insert_one(new_item_data)
         message = "Item added successfully."
 
@@ -133,9 +133,6 @@ async def export_data():
 
     # Prepare DataFrame
     df = pd.DataFrame(data)
-
-    # Filter out rows where "Unit" is "DMO"
-    # df = df[df["Unit"] != "DMO"]
 
     # Convert DataFrame to XLSX in Memory
     output = io.BytesIO()
@@ -194,6 +191,48 @@ async def get_valves_summary(request: Request):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/del-dmo")
+def del_dmo():
+    # Delete documents where "id" starts with "DMO"
+    collection.delete_many({"id": {"$regex": "^DMO"}})
+
+    update_operations = []
+
+    for doc in collection.find():
+        update_fields = {}
+        unset_fields = {}
+
+        # Check if both "created" and "updated" fields exist
+        if "created" in doc and "updated" in doc:
+            # Rename both to "Not Started", using the "created" field's value
+            update_fields["Not Started"] = doc["created"]
+            # Mark both "created" and "updated" fields for removal
+            unset_fields["created"] = ""
+            unset_fields["updated"] = ""
+        
+        # If only "created" exists, rename it to "Not Started"
+        elif "created" in doc:
+            update_fields["Not Started"] = doc["created"]
+            unset_fields["created"] = ""  # To delete the "created" field
+        
+        # If only "updated" exists, rename it to "Not Started"
+        elif "updated" in doc:
+            update_fields["Not Started"] = doc["updated"]
+            unset_fields["updated"] = ""  # To delete the "updated" field
+        
+        # Apply changes only if there's an update to be made
+        if update_fields or unset_fields:
+            # Combine $set (to rename) and $unset (to remove the old field)
+            update_operations.append(
+                UpdateOne({"_id": doc["_id"]}, {"$set": update_fields, "$unset": unset_fields})
+            )
+
+    # Perform the bulk update
+    if update_operations:
+        collection.bulk_write(update_operations)
+
+    return {"message":"Done."}
 
 if __name__ == "__main__":
     import uvicorn
