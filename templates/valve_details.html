@@ -133,6 +133,7 @@
             } %}
 
             {% set ordered_stages = [
+                "Not Started",
                 "Received in Laydown Area",
                 "Send to Workshop",
                 "Received in Workshop",
@@ -147,7 +148,7 @@
                 {% set stage = stage_counts | selectattr('stage', 'equalto', stage_name) | first %}
                 {% if stage %}
                 <tr>
-                    <td>{{ loop.index + 1 }}</td>
+                    <td>{{ loop.index - 1 }}</td>
                     <td>{{ replacements.get(stage.stage, stage.stage) }}</td>
                     <td>
                         <span class="stage-count" style="text-decoration: none; color: inherit;" 
