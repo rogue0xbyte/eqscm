@@ -103,6 +103,12 @@
             background-color: #d6d6d6;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
     </style>
 </head>
 <body>
@@ -182,10 +188,12 @@
             const modalContent = document.getElementById('modalContent');
             modalContent.innerHTML = '';
             const ul = document.createElement('ul');
-            stageItems.forEach(item => {
-              const li = document.createElement('li');
-              li.textContent = item;
-              ul.appendChild(li);
+            stageItems.forEach(item => {const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = `https://eqscm.intellx.in/status/${item}`;
+            a.textContent = item;
+            li.appendChild(a);
+            ul.appendChild(li);
             });
             modalContent.appendChild(ul);
             document.getElementById('valveModal').style.display = 'flex';
