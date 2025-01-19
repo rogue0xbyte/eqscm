@@ -13,6 +13,28 @@ collection.delete_many({"id": {"$regex": "^DMO"}})
 
 print("Deleted documents where id starts with 'DMO'.")
 
+toDelete = [
+    "ASP25-124",
+    "EG1-153",
+    "ASP25-033",
+    "ASP25-040",
+    "ASP25-120",
+    "ASP25-058",
+    "EG1-50",
+    "EG1-31",
+    "EG1-33",
+    "EG1-56",
+    "EG1-38",
+    "EG1-58",
+    "EG1-13"
+]
+
+
+for i in toDelete:
+    collection.delete_one({"id":i})
+
+print("Deleted incorrect docs.")
+
 update_operations = []
 
 for doc in collection.find():

@@ -116,18 +116,43 @@
         
         <table>
             <tr>
+                <td><strong>Stage #</strong></td>
                 <td><strong>Stage Name</strong></td>
                 <td><strong>Valve Count</strong></td>
             </tr>
-            {% for stage in stage_counts %}
-            <tr>
-                <td>{{ stage.stage }}</td>
-                <td><span class="stage-count" style="text-decoration: none; color: inherit;" onclick="showModal([
-                    {% for i in stage.details['items'] %}
-                        '{{i}}',
-                    {% endfor %}
-                ])">{{ stage.details.count }}</span></td>
-            </tr>
+            {% set replacements = {
+                "Received in Laydown Area after O/H": "Received in Laydown Area from Workshop",
+                "Send to Workshop": "Out from Laydown Area",
+                "Received in Laydown Area": "Received in Laydown Area from Plant"
+            } %}
+
+            {% set ordered_stages = [
+                "Received in Laydown Area",
+                "Send to Workshop",
+                "Received in Workshop",
+                "Out from Workshop",
+                "Received in Laydown Area after O/H",
+                "Picked up for Installation",
+                "Installed",
+                "Final Handover to Operation"
+            ] %}
+
+            {% for stage_name in ordered_stages %}
+                {% set stage = stage_counts | selectattr('stage', 'equalto', stage_name) | first %}
+                {% if stage %}
+                <tr>
+                    <td>{{ loop.index + 1 }}</td>
+                    <td>{{ replacements.get(stage.stage, stage.stage) }}</td>
+                    <td>
+                        <span class="stage-count" style="text-decoration: none; color: inherit;" 
+                              onclick="showModal([
+                                  {% for i in stage.details['items'] %}
+                                      '{{ i }}',
+                                  {% endfor %}
+                              ])">{{ stage.details.count }}</span>
+                    </td>
+                </tr>
+                {% endif %}
             {% endfor %}
         </table>
         <br/>

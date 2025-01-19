@@ -41,9 +41,10 @@ async def get_status_page(id: str, request: Request):
         status_object.pop("_id", None)
 
     else:
+        return JSONResponse(content={"error": "Incorrect Job ID."}, status_code=400)
         # Create New Object if Not Found
-        status_object = {"id": id, "Not Started": get_current_time_gmt3()}
-        collection.insert_one(status_object)
+        # status_object = {"id": id, "Not Started": get_current_time_gmt3()}
+        # collection.insert_one(status_object)
 
     return templates.TemplateResponse("status_page.html", {"request": request, "status_id": id, "status_data": status_object})
 
